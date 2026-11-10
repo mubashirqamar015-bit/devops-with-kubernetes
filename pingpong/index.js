@@ -1,10 +1,20 @@
 const http = require('http')
+const fs = require('fs')
 
-let counter = 0
+const counterFile = process.env.COUNTER_FILE || '/usr/src/app/data/pingpong.txt'
+
+if (!fs.existsSync(counterFile)) {
+  fs.writeFileSync(counterFile, '0')
+}
 
 const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/pingpong') {
+    let counter = Number(fs.readFileSync(counterFile, 'utf8'))
+
     counter++
+
+    fs.writeFileSync(counterFile, String(counter))
+
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end(`pong ${counter}`)
   } else {

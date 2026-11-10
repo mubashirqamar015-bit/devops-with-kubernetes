@@ -15,6 +15,9 @@ spec:
       volumes:
         - name: shared-logs
           emptyDir: {}
+        - name: pingpong-data
+          persistentVolumeClaim:
+            claimName: pingpong-pvc
       containers:
         - name: log-writer
           image: log-writer:1.10
@@ -23,10 +26,12 @@ spec:
             - name: shared-logs
               mountPath: /usr/src/app/files
         - name: log-reader
-          image: log-reader:1.10
+          image: log-reader:1.11
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
           volumeMounts:
             - name: shared-logs
               mountPath: /usr/src/app/files
+            - name: pingpong-data
+              mountPath: /usr/src/app/data

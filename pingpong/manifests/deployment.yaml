@@ -1,24 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: pingpong
-
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: pingpong
-
   template:
     metadata:
       labels:
         app: pingpong
-
     spec:
+      volumes:
+        - name: pingpong-data
+          persistentVolumeClaim:
+            claimName: pingpong-pvc
       containers:
         - name: pingpong
-          image: pingpong:1.9
+          image: pingpong:1.11
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
+          volumeMounts:
+            - name: pingpong-data
+              mountPath: /usr/src/app/data
