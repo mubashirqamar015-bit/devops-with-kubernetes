@@ -62,6 +62,24 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' })
     res.end(`
       <h1>Todo app</h1>
+
+      <form onsubmit="return false">
+        <input
+          type="text"
+          name="todo"
+          maxlength="140"
+          placeholder="Write a todo..."
+        >
+        <button type="submit">Send</button>
+      </form>
+
+      <h2>Todos</h2>
+      <ul>
+        <li>Learn Kubernetes</li>
+        <li>Complete exercise 1.13</li>
+        <li>Build a Todo app</li>
+      </ul>
+
       <img src="/todo/image" alt="Random picture">
     `)
   } else if (req.method === 'GET' && req.url === '/todo/image') {
