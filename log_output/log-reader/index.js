@@ -2,15 +2,27 @@ const http = require('http')
 const fs = require('fs')
 
 const filePath = process.env.FILE_PATH || '/usr/src/app/files/output.txt'
-const counterFile = process.env.COUNTER_FILE || '/usr/src/app/data/pingpong.txt'
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/') {
-    const log = fs.readFileSync(filePath, 'utf8')
-    const counter = fs.readFileSync(counterFile, 'utf8')
+    try {
+      const log = fs.readFileSync(filePath, 'utf8')
 
-    res.writeHead(200, { 'Content-Type': 'text/plain' })
-    res.end(`${log}Ping / Pongs: ${counter}`)
+      const response = await fetch('http://pingpong-svc:3000/pongs')
+
+      if (!response.ok) {
+        throw new Error(`Ping Pong returned ${response.status}`)
+      }
+
+      const counter = await response.text()
+
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end(`${log}Ping / Pongs: ${counter}`)
+    } catch (error) {
+      console.error('Failed to retrieve log or pong count:', error.message)
+      res.writeHead(500)
+      res.end('Unable to retrieve application data')
+    }
   } else {
     res.writeHead(404)
     res.end('Not found')

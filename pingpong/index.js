@@ -17,6 +17,11 @@ const server = http.createServer((req, res) => {
 
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end(`pong ${counter}`)
+  } else if (req.method === 'GET' && req.url === '/pongs') {
+    const counter = fs.readFileSync(counterFile, 'utf8')
+
+    res.writeHead(200, { 'Content-Type': 'text/plain' })
+    res.end(counter)
   } else {
     res.writeHead(404)
     res.end('Not found')

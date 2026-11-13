@@ -18,7 +18,7 @@ spec:
             claimName: pingpong-pvc
       containers:
         - name: pingpong
-          image: pingpong:1.11
+          image: pingpong:2.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
