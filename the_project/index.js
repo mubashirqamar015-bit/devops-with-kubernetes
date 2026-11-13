@@ -5,6 +5,7 @@ const path = require('path')
 const port = process.env.PORT || 3000
 const imagePath = path.join(__dirname, 'data', 'image.jpg')
 const cacheDuration = 10 * 60 * 1000
+const backendUrl = 'http://todo-backend-svc:3000'
 
 let refreshPromise = null
 
@@ -63,25 +64,110 @@ const server = http.createServer(async (req, res) => {
     res.end(`
       <h1>Todo app</h1>
 
-      <form onsubmit="return false">
+      <form id="todo-form">
         <input
           type="text"
-          name="todo"
+          id="todo-input"
           maxlength="140"
           placeholder="Write a todo..."
+          required
         >
         <button type="submit">Send</button>
       </form>
 
       <h2>Todos</h2>
-      <ul>
-        <li>Learn Kubernetes</li>
-        <li>Complete exercise 1.13</li>
-        <li>Build a Todo app</li>
-      </ul>
+      <ul id="todo-list"></ul>
 
       <img src="/todo/image" alt="Random picture">
+
+      <script>
+        const form = document.querySelector('#todo-form')
+        const input = document.querySelector('#todo-input')
+        const list = document.querySelector('#todo-list')
+
+        async function loadTodos() {
+          const response = await fetch('/todo/todos')
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch todos')
+          }
+
+          const todos = await response.json()
+
+          list.replaceChildren()
+
+          for (const todo of todos) {
+            const item = document.createElement('li')
+            item.textContent = todo.todo
+            list.appendChild(item)
+          }
+        }
+
+        form.addEventListener('submit', async event => {
+          event.preventDefault()
+
+          const todo = input.value.trim()
+
+          if (!todo) return
+
+          const response = await fetch('/todo/todos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ todo })
+          })
+
+          if (!response.ok) {
+            alert('Failed to create todo')
+            return
+          }
+
+          input.value = ''
+          await loadTodos()
+        })
+
+        loadTodos().catch(error => {
+          console.error(error)
+          list.textContent = 'Unable to load todos'
+        })
+      </script>
     `)
+  } else if (
+    (req.method === 'GET' || req.method === 'POST') &&
+    req.url === '/todo/todos'
+  ) {
+    try {
+      let options = {}
+
+      if (req.method === 'POST') {
+        let body = ''
+
+        for await (const chunk of req) {
+          body += chunk
+        }
+
+        options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body
+        }
+      }
+
+      const response = await fetch(`${backendUrl}/todos`, options)
+      const data = await response.text()
+
+      res.writeHead(response.status, {
+        'Content-Type': 'application/json'
+      })
+      res.end(data)
+    } catch (error) {
+      console.error('Todo backend request failed:', error.message)
+      res.writeHead(502)
+      res.end('Todo backend unavailable')
+    }
   } else if (req.method === 'GET' && req.url === '/todo/image') {
     try {
       const image = await getImage()
