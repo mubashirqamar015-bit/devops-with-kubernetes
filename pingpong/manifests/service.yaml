@@ -3,6 +3,7 @@ kind: Service
 
 metadata:
   name: pingpong-svc
+  namespace: exercises
 
 spec:
   type: ClusterIP
