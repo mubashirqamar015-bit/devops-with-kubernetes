@@ -2,11 +2,14 @@ const http = require('http')
 const fs = require('fs')
 
 const filePath = process.env.FILE_PATH || '/usr/src/app/files/output.txt'
+const configFilePath = '/etc/config/information.txt'
 
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/') {
     try {
       const log = fs.readFileSync(filePath, 'utf8')
+      const fileContent = fs.readFileSync(configFilePath, 'utf8').trim()
+      const message = process.env.MESSAGE
 
       const response = await fetch('http://pingpong-svc:3000/pongs')
 
@@ -17,9 +20,13 @@ const server = http.createServer(async (req, res) => {
       const counter = await response.text()
 
       res.writeHead(200, { 'Content-Type': 'text/plain' })
-      res.end(`${log}Ping / Pongs: ${counter}`)
+      res.end(
+        `file content: ${fileContent}\n` +
+        `env variable: MESSAGE=${message}\n` +
+        `${log}Ping / Pongs: ${counter}`
+      )
     } catch (error) {
-      console.error('Failed to retrieve log or pong count:', error.message)
+      console.error('Failed to retrieve application data:', error.message)
       res.writeHead(500)
       res.end('Unable to retrieve application data')
     }
