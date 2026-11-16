@@ -15,10 +15,13 @@ spec:
     spec:
       containers:
         - name: todo-app
-          image: todo-app:2.2
+          image: todo-app:2.6
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: todo-app-config
           volumeMounts:
             - name: todo-image-storage
               mountPath: /app/data

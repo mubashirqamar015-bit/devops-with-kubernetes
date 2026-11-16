@@ -1,16 +1,28 @@
 const http = require('http')
 const fs = require('fs/promises')
-const path = require('path')
 
-const port = process.env.PORT || 3000
-const imagePath = path.join(__dirname, 'data', 'image.jpg')
-const cacheDuration = 10 * 60 * 1000
-const backendUrl = 'http://todo-backend-svc:3000'
+const port = Number(process.env.PORT)
+const backendUrl = process.env.BACKEND_URL
+const imageUrl = process.env.IMAGE_URL
+const cacheDuration = Number(process.env.CACHE_DURATION)
+const imagePath = process.env.IMAGE_PATH
+
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  throw new Error('A valid PORT environment variable is required')
+}
+
+if (!backendUrl || !imageUrl || !imagePath) {
+  throw new Error('BACKEND_URL, IMAGE_URL and IMAGE_PATH are required')
+}
+
+if (!Number.isFinite(cacheDuration) || cacheDuration < 0) {
+  throw new Error('A valid CACHE_DURATION environment variable is required')
+}
 
 let refreshPromise = null
 
 async function downloadImage() {
-  const response = await fetch('https://picsum.photos/1200')
+  const response = await fetch(imageUrl)
 
   if (!response.ok) {
     throw new Error(`Image download failed: ${response.status}`)

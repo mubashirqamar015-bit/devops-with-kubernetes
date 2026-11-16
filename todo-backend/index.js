@@ -1,5 +1,11 @@
 const http = require('http')
 
+const port = Number(process.env.PORT)
+
+if (!port) {
+  throw new Error('PORT environment variable is required')
+}
+
 const todos = []
 
 const server = http.createServer(async (req, res) => {
@@ -40,6 +46,6 @@ const server = http.createServer(async (req, res) => {
   }
 })
 
-server.listen(3000, () => {
-  console.log('Todo backend started on port 3000')
+server.listen(port, () => {
+  console.log(`Todo backend started on port ${port}`)
 })
