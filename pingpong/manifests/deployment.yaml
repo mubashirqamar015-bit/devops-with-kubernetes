@@ -13,16 +13,29 @@ spec:
       labels:
         app: pingpong
     spec:
-      volumes:
-        - name: pingpong-data
-          persistentVolumeClaim:
-            claimName: pingpong-pvc
       containers:
         - name: pingpong
-          image: pingpong:2.1
+          image: pingpong:2.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
-          volumeMounts:
-            - name: pingpong-data
-              mountPath: /usr/src/app/data
+          env:
+            - name: PGHOST
+              value: postgres-svc
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
