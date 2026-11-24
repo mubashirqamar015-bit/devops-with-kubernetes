@@ -1,3 +1,5 @@
 /the_project/data/
 /pingpong/node_modules/
 /pingpong/manifests/postgres-secret.yaml
+/todo-backend/node_modules/
+/todo-backend/manifests/postgres-secret.yaml
