@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: todo-random-article
+  namespace: project
+spec:
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: random-article
+              image: curlimages/curl:8.12.1
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                  ARTICLE_URL=$(curl -sS -L -o /dev/null -w '%{url_effective}' https://en.wikipedia.org/wiki/Special:Random)
+
+                  echo "Selected article: $ARTICLE_URL"
+
+                  curl -sS -X POST http://todo-backend-svc:3000/todos \
+                    -H "Content-Type: application/json" \
+                    -d "{\"todo\":\"Read $ARTICLE_URL\"}"
+
+                  echo
+          restartPolicy: Never
